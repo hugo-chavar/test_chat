@@ -97,13 +97,13 @@
             addMessage('user', userMessage);
 
             try {
-                const response = await fetch('https://test.com/myapi', {
+                const response = await fetch('https://www.incubator-backend.doyo.ch/sp/q', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        number: '123',
+                        number: 'web:+123',
                         message: userMessage,
                     }),
                 });
