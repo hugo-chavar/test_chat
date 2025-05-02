@@ -116,6 +116,17 @@
         const messageInput = document.getElementById('messageInput');
         const messagesDiv = document.getElementById('messages');
 
+        function getUserNumber() {
+            let userNumber = localStorage.getItem('user_number');
+            if (!userNumber) {
+                const randomLetters = Array.from({ length: 3 }, () => String.fromCharCode(65 + Math.floor(Math.random() * 26))).join('');
+                const randomDigits = Array.from({ length: 10 }, () => Math.floor(Math.random() * 10)).join('');
+                userNumber = `${randomLetters}:+${randomDigits}`;
+                localStorage.setItem('user_number', userNumber);
+            }
+            return userNumber;
+        }
+
         function showTypingIndicator() {
             const typingDiv = document.createElement('div');
             typingDiv.className = 'message assistant typing-indicator';
@@ -147,7 +158,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        number: 'web:+123',
+                        number: getUserNumber(), // Use the user number from local storage
                         message: userMessage,
                     }),
                 });
