@@ -120,8 +120,12 @@
         });
 
         function formatMessage(message) {
-            // Replace '\n' with actual line breaks and wrap in <p> tags for better formatting
-            return message.replace(/\\n/g, '<br>').replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+            console.log('Raw message:', message);
+            return message.replace(/\\n/g, '\n') // Ensure \n is treated as \n
+                .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
+                .split('\n')
+                .map(line => `<p>${line.trim()}</p>`) // Wrap each line in its own <p> tag
+                .join('');
         }
 
         function addMessage(sender, text) {
