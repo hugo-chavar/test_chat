@@ -110,7 +110,7 @@
 
                 const data = await response.json();
                 console.log(data);
-                addMessage('assistant', data.response);
+                addMessage('assistant', data.response[0]);
             } catch (error) {
                 console.error('Error:', error);
                 addMessage('assistant', 'Error: Unable to send message.');
