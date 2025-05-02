@@ -90,11 +90,29 @@
         const messageInput = document.getElementById('messageInput');
         const messagesDiv = document.getElementById('messages');
 
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message assistant';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.textContent = 'Assistant is typing...';
+            messagesDiv.appendChild(typingDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typingDiv = document.getElementById('typingIndicator');
+            if (typingDiv) {
+                typingDiv.remove();
+            }
+        }
+
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const userMessage = messageInput.value;
             addMessage('user', userMessage);
+
+            showTypingIndicator(); // Show typing indicator
 
             try {
                 const response = await fetch('https://www.incubator-backend.doyo.ch/sp/q', {
@@ -109,10 +127,11 @@
                 });
 
                 const data = await response.json();
-                console.log(data);
+                removeTypingIndicator(); // Remove typing indicator
                 addMessage('assistant', data.response[0]);
             } catch (error) {
                 console.error('Error:', error);
+                removeTypingIndicator(); // Remove typing indicator
                 addMessage('assistant', 'Error: Unable to send message.');
             }
 
