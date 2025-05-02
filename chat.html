@@ -109,18 +109,25 @@
                 });
 
                 const data = await response.json();
+                console.log(data);
                 addMessage('assistant', data.response);
             } catch (error) {
+                console.error('Error:', error);
                 addMessage('assistant', 'Error: Unable to send message.');
             }
 
             messageInput.value = '';
         });
 
+        function formatMessage(message) {
+            // Replace '\n' with actual line breaks and wrap in <p> tags for better formatting
+            return message.replace(/\\n/g, '<br>').replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+        }
+
         function addMessage(sender, text) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}`;
-            messageDiv.textContent = text;
+            messageDiv.innerHTML = formatMessage(text); // Use innerHTML to render formatted text
             messagesDiv.appendChild(messageDiv);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
