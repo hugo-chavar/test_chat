@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+
+        .messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background: #f9f9f9;
+        }
+
+        .chat-bubble {
+            background-color: #e0f7fa;
+            /* Example background color */
+            color: #212121;
+            /* Example text color */
+            border-radius: 10px;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            position: relative;
+            /* Needed for positioning the pseudo-element */
+            max-width: 80%;
+            /* Adjust as needed */
+        }
+
+        /* Style for messages sent by the user (point on the right) */
+        .chat-bubble.sent {
+            background-color: #cce7c2;
+            border-bottom-right-radius: 0;
+            text-align: right;
+            /* Remove the bottom-right rounding */
+        }
+
+        .chat-bubble.sent::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: -10px;
+            /* Adjust to control the protrusion distance */
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            /* Creates the left side of the point */
+            border-top: 10px solid #cce7c2;
+            /* Matches the bubble background */
+        }
+
+        /* Style for messages received (point on the left) */
+        .chat-bubble.received {
+            background-color: #929495;
+            border-bottom-left-radius: 0;
+            /* Remove the bottom-left rounding */
+            align-self: flex-start;
+            text-align: left;
+            /* If using Flexbox for layout */
+        }
+
+        .chat-bubble.received::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -10px;
+            /* Adjust to control the protrusion distance */
+            width: 0;
+            height: 0;
+            border-right: 10px solid transparent;
+            /* Creates the right side of the point */
+            border-top: 10px solid #929495;
+            /* Matches the bubble background */
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 500px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-container>.received {
+            align-self: flex-start;
+        }
+
+        form {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        /* Add spinner styles */
+        .processing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .spinner {
+            width: 12px;
+            height: 12px;
+            border: 2px solid #ddd;
+            border-top: 2px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .credentials {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .credentials input[type="text"],
+        .credentials input[type="password"] {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .chat-bubble.error {
+            background: #d32f2f;
+            border-bottom-left-radius: 0;
+            color: #fff;
+            font-weight: bold;
+            align-self: flex-start;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat-container">
+        <div class="credentials">
+            <input type="text" id="usernameInput" placeholder="Username" required>
+            <input type="password" id="passwordInput" placeholder="Password" required>
+        </div>
+        <div class="messages" id="messages"></div>
+        <form id="chatForm">
+            <input type="text" id="nameInput" placeholder="Ingrese el nombre (sin apellido)..." required>
+            <input type="text" id="numberInput" placeholder="+59000000000..." required>
+            <button type="submit">Autorizar</button>
+        </form>
+    </div>
+
+    <script>
+        const chatForm = document.getElementById('chatForm');
+        const nameInput = document.getElementById('nameInput');
+        const numberInput = document.getElementById('numberInput');
+        const messagesDiv = document.getElementById('messages');
+        const usernameInput = document.getElementById('usernameInput');
+        const passwordInput = document.getElementById('passwordInput');
+
+        function showProcessingIndicator() {
+            const processingDiv = document.createElement('div');
+            processingDiv.className = 'message assistant processing-indicator';
+            processingDiv.id = 'processingIndicator';
+            processingDiv.innerHTML = '<div class="spinner"></div> Autorizando usuario...';
+            messagesDiv.appendChild(processingDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function removeProcessingIndicator() {
+            const processingDiv = document.getElementById('processingIndicator');
+            if (processingDiv) {
+                processingDiv.remove();
+            }
+        }
+
+        function sanitizePhoneNumber(phone) {
+            return phone.replace(/[-()+\s]/g, '');
+        }
+
+        function isValidMobileNumber(phone) {
+            const sanitized = sanitizePhoneNumber(phone);
+
+            // Argentina mobile: starts with 549, total length = 13 digits
+            const isArgentinaMobile = /^549\d{10}$/.test(sanitized);
+
+            // Uruguay mobile: starts with 5989, total length = 11 digits
+            const isUruguayMobile = /^5989\d{7}$/.test(sanitized);
+
+            return isArgentinaMobile || isUruguayMobile;
+        }
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Get credentials
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+            if (!username || !password) {
+                removeProcessingIndicator();
+                addMessage('assistant', 'Error: Usuario y contraseña son requeridos.');
+                return;
+            }
+            const userName = nameInput.value;
+            const userNumber = numberInput.value;
+            if (!userName || !userNumber) {
+                addMessage('assistant', 'Error: Nombre y número son requeridos.');
+                return;
+            }
+            addMessage('user', 'Autorizar usuario: ' + userName + ' ' + userNumber);
+            if (!isValidMobileNumber(userNumber)) {
+                addMessage('assistant', 'Error: Número de teléfono inválido. Debe ser un número móvil de Argentina o Uruguay.');
+                return;
+            }
+
+            showProcessingIndicator();
+
+
+            // Encode credentials for HTTP Basic Auth
+            const credentials = btoa(`${username}:${password}`);
+            const sanitizedUserNumber = sanitizePhoneNumber(userNumber);
+
+            try {
+                const response = await fetch('https://www.incubator-backend.doyo.ch/sp/add-user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Basic ${credentials}`,
+                    },
+                    body: JSON.stringify({
+                        number: sanitizedUserNumber,
+                        name: userName,
+                    }),
+                });
+                removeProcessingIndicator();
+
+                if (response.status === 401) {
+                    addMessage('assistant', 'Error: Revise su usuario y contraseña.');
+                    return;
+                }
+
+                if (!response.ok) {
+                    addMessage('assistant', `Error: Server returned status ${response.status}.`);
+                    return;
+                }
+
+                const data = await response.json();
+                console.log('Response data:', data);
+                if (data && data.status) {
+                    addMessage('assistant', data.status);
+                } else {
+                    addMessage('assistant', 'Error: Unexpected server response.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                removeProcessingIndicator();
+                addMessage('assistant', 'Error: No se pudo enviar su mensaje.');
+            }
+
+            nameInput.value = '';
+            numberInput.value = '';
+        });
+
+        function addMessage(sender, text) {
+            const messageDiv = document.createElement('div');
+            let className = 'chat-bubble ';
+
+            if (
+                sender === 'assistant' &&
+                typeof text === 'string' &&
+                text.trim().startsWith('Error:')
+            ) {
+                className += 'error';
+            } else {
+                if (sender === 'user') {
+                    className += 'sent';
+                } else if (sender === 'assistant') {
+                    className += 'received';
+                }
+            }
+
+            messageDiv.className = className;
+            messageDiv.innerHTML = text;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+    </script>
+</body>
+
+</html>
