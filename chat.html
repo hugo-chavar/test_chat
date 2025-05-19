@@ -53,6 +53,7 @@
 
         /* Style for messages sent by the user (point on the right) */
         .chat-bubble.sent {
+            background-color: #780ec5;
             border-bottom-right-radius: 0;
             text-align: right;
             /* Remove the bottom-right rounding */
@@ -74,6 +75,7 @@
 
         /* Style for messages received (point on the left) */
         .chat-bubble.received {
+            background-color: #d20f6a;
             border-bottom-left-radius: 0;
             /* Remove the bottom-left rounding */
             align-self: flex-start;
@@ -91,16 +93,25 @@
             height: 0;
             border-right: 10px solid transparent;
             /* Creates the right side of the point */
-            border-top: 10px solid #568c93;
+            border-top: 10px solid #47d71a;
             /* Matches the bubble background */
         }
 
-        /* Example layout using Flexbox */
+        /*
         .chat-container {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            /* Default alignment for sent messages */
+        }
+        */
+
+        .chat-container {
+            width: 100%;
+            max-width: 500px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .chat-container>.received {
@@ -193,10 +204,13 @@
             text-align: left;
         }
 
-        .chat-message.error {
+        .chat-bubble.error {
             background: #d32f2f;
+            border-bottom-left-radius: 0;
             color: #fff;
             font-weight: bold;
+            align-self: flex-start;
+            text-align: left;
         }
     </style>
 </head>
@@ -323,18 +337,18 @@
             const messageDiv = document.createElement('div');
             let className = 'chat-bubble ';
 
-            if (sender === 'user') {
-                className += 'sent';
-            } else if (sender === 'assistant') {
-                className += 'received';
-            }
-
             if (
                 sender === 'assistant' &&
                 typeof text === 'string' &&
                 text.trim().startsWith('Error:')
             ) {
-                className += ' error';
+                className += 'error';
+            } else {
+                if (sender === 'user') {
+                    className += 'sent';
+                } else if (sender === 'assistant') {
+                    className += 'received';
+                }
             }
 
             messageDiv.className = className;
