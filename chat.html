@@ -195,9 +195,27 @@
                     }),
                 });
 
+                if (response.status === 401) {
+                    removeTypingIndicator();
+                    addMessage('assistant', 'Error: Unauthorized. Please check your username and password.');
+                    messageInput.value = '';
+                    return;
+                }
+
+                if (!response.ok) {
+                    removeTypingIndicator();
+                    addMessage('assistant', `Error: Server returned status ${response.status}.`);
+                    messageInput.value = '';
+                    return;
+                }
+
                 const data = await response.json();
                 removeTypingIndicator(); // Remove typing indicator
-                addMessage('assistant', data.response[0]);
+                if (data && data.response && Array.isArray(data.response) && data.response.length > 0) {
+                    addMessage('assistant', data.response[0]);
+                } else {
+                    addMessage('assistant', 'Error: Unexpected server response.');
+                }
             } catch (error) {
                 console.error('Error:', error);
                 removeTypingIndicator(); // Remove typing indicator
