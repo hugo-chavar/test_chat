@@ -186,8 +186,8 @@
         </div>
         <div class="messages" id="messages"></div>
         <form id="chatForm">
-            <input type="text" id="messageInput" placeholder="Type your message..." required>
-            <button type="submit">Send</button>
+            <input type="text" id="messageInput" placeholder="Escribe tu consulta..." required>
+            <button type="submit">Enviar</button>
         </form>
     </div>
 
@@ -259,14 +259,14 @@
 
                 if (response.status === 401) {
                     removeTypingIndicator();
-                    addMessage('assistant', 'Error: Unauthorized. Please check your username and password.');
+                    addMessage('assistant', 'Error: No autorizado. Por favor revisa tu usuario y contraseña.');
                     messageInput.value = '';
                     return;
                 }
 
                 if (!response.ok) {
                     removeTypingIndicator();
-                    addMessage('assistant', `Error: Server returned status ${response.status}.`);
+                    addMessage('assistant', `Error: El servidor retornó código de estado ${response.status}.`);
                     messageInput.value = '';
                     return;
                 }
@@ -276,12 +276,12 @@
                 if (data && data.response && Array.isArray(data.response) && data.response.length > 0) {
                     addMessage('assistant', data.response[0]);
                 } else {
-                    addMessage('assistant', 'Error: Unexpected server response.');
+                    addMessage('assistant', 'Error: Inesperada respuesta del servidor. Consulte');
                 }
             } catch (error) {
                 console.error('Error:', error);
                 removeTypingIndicator(); // Remove typing indicator
-                addMessage('assistant', 'Error: Unable to send message.');
+                addMessage('assistant', 'Error: No se ha podido enviar su mensaje.');
             }
 
             messageInput.value = '';
