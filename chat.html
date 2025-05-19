@@ -113,6 +113,15 @@
             border: 1px solid #ddd;
             border-radius: 4px;
         }
+
+        .assistant.error {
+            background: #d32f2f;
+            color: #fff;
+            font-weight: bold;
+            border-radius: 4px;
+            padding: 8px 12px;
+            display: inline-block;
+        }
     </style>
 </head>
 
@@ -236,7 +245,15 @@
 
         function addMessage(sender, text) {
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}`;
+            let className = `message ${sender}`;
+            if (
+                sender === 'assistant' &&
+                typeof text === 'string' &&
+                text.trim().startsWith('Error:')
+            ) {
+                className += ' error';
+            }
+            messageDiv.className = className;
             messageDiv.innerHTML = formatMessage(text); // Use innerHTML to render formatted text
             messagesDiv.appendChild(messageDiv);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
