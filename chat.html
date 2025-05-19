@@ -45,6 +45,74 @@
             text-align: right;
         }
 
+        .chat-bubble {
+            background-color: #e0f7fa;
+            /* Example background color */
+            color: #212121;
+            /* Example text color */
+            border-radius: 10px;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            position: relative;
+            /* Needed for positioning the pseudo-element */
+            max-width: 80%;
+            /* Adjust as needed */
+        }
+
+        /* Style for messages sent by the user (point on the right) */
+        .chat-bubble.sent {
+            border-bottom-right-radius: 0;
+            /* Remove the bottom-right rounding */
+        }
+
+        .chat-bubble.sent::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: -10px;
+            /* Adjust to control the protrusion distance */
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            /* Creates the left side of the point */
+            border-top: 10px solid #e0f7fa;
+            /* Matches the bubble background */
+        }
+
+        /* Style for messages received (point on the left) */
+        .chat-bubble.received {
+            border-bottom-left-radius: 0;
+            /* Remove the bottom-left rounding */
+            align-self: flex-start;
+            /* If using Flexbox for layout */
+        }
+
+        .chat-bubble.received::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -10px;
+            /* Adjust to control the protrusion distance */
+            width: 0;
+            height: 0;
+            border-right: 10px solid transparent;
+            /* Creates the right side of the point */
+            border-top: 10px solid #e0f7fa;
+            /* Matches the bubble background */
+        }
+
+        /* Example layout using Flexbox */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            /* Default alignment for sent messages */
+        }
+
+        .chat-container>.received {
+            align-self: flex-start;
+        }
+
         .message.assistant {
             text-align: left;
         }
