@@ -99,11 +99,29 @@
                 transform: rotate(360deg);
             }
         }
+
+        .credentials {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .credentials input[type="text"],
+        .credentials input[type="password"] {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
     </style>
 </head>
 
 <body>
     <div class="chat-container">
+        <div class="credentials">
+            <input type="text" id="usernameInput" placeholder="Username" required>
+            <input type="password" id="passwordInput" placeholder="Password" required>
+        </div>
         <div class="messages" id="messages"></div>
         <form id="chatForm">
             <input type="text" id="messageInput" placeholder="Type your message..." required>
@@ -115,6 +133,8 @@
         const chatForm = document.getElementById('chatForm');
         const messageInput = document.getElementById('messageInput');
         const messagesDiv = document.getElementById('messages');
+        const usernameInput = document.getElementById('usernameInput');
+        const passwordInput = document.getElementById('passwordInput');
 
         function getUserNumber() {
             let userNumber = localStorage.getItem('user_number');
@@ -151,11 +171,23 @@
 
             showTypingIndicator(); // Show typing indicator
 
+            // Get credentials
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+            if (!username || !password) {
+                removeTypingIndicator();
+                addMessage('assistant', 'Error: Username and password are required.');
+                return;
+            }
+            // Encode credentials for HTTP Basic Auth
+            const credentials = btoa(`${username}:${password}`);
+
             try {
                 const response = await fetch('https://www.incubator-backend.doyo.ch/sp/q', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Basic ${credentials}`,
                     },
                     body: JSON.stringify({
                         number: getUserNumber(), // Use the user number from local storage
