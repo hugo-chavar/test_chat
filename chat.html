@@ -319,12 +319,12 @@
 
         function addMessage(sender, text) {
             const messageDiv = document.createElement('div');
-            let className = 'chat-message ';
+            let className = 'chat-bubble ';
 
             if (sender === 'user') {
-                className += 'user';
+                className += 'sent';
             } else if (sender === 'assistant') {
-                className += 'assistant';
+                className += 'received';
             }
 
             if (
